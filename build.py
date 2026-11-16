@@ -84,8 +84,13 @@ def band_html(data, site, services=None, all_url=None):
         cards = cards[:limit]
         more = f'    <p class="cgs-all"><a href="{esc(all_url)}" target="_blank" rel="noopener">すべてのサービスを見る</a></p>\n'
     lead = data['lead'].replace('{site}', site['name'])
-    # 載せる先の本文の幅（px）。書いていなければ CSS の既定（1152px）
-    width = f' style="--cgs-max: {int(site["max_width"])}px"' if site.get('max_width') else ''
+    # 載せる先の本文の幅と、カードの最小の幅（px）。書いていなければ CSS の既定
+    props = []
+    if site.get('max_width'):
+        props.append(f'--cgs-max: {int(site["max_width"])}px')
+    if site.get('min_card'):
+        props.append(f'--cgs-min: {int(site["min_card"])}px')
+    width = f' style="{"; ".join(props)}"' if props else ''
     return (
         f'<section class="cgs" aria-label="{esc(data["heading"])}"{width}>\n'
         '  <div class="cgs-in">\n'

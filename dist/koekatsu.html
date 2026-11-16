@@ -1,4 +1,4 @@
-<!-- group-services 42a8349d9d24 -->
+<!-- group-services f85081d61829 -->
 <style>
 .cgs, .cgs * { box-sizing: border-box; }
 .cgs { margin: 0; padding: 40px 16px; background: #f8fafc; border-top: 1px solid #e2e8f0; color: #0f172a; font-size: 14px; line-height: 1.6; text-align: left; }
@@ -15,7 +15,7 @@
 .cgs .cgs-op-c a { text-decoration: underline; text-underline-offset: 2px; }
 .cgs .cgs-op-c a:hover { color: #1d4ed8; }
 .cgs-op-n { font-size: 12px; color: #334155; line-height: 1.5; margin-top: 1px; }
-.cgs ul.cgs-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.cgs ul.cgs-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--cgs-min, 165px), 1fr)); gap: 12px; }
 .cgs li.cgs-card { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 13px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; transition: border-color .15s, box-shadow .15s; }
 .cgs li.cgs-card:hover, .cgs li.cgs-card:focus-within { border-color: #93c5fd; box-shadow: 0 4px 14px rgba(15, 23, 42, .08); }
 .cgs-top { display: flex; align-items: center; gap: 9px; min-height: 36px; }
@@ -39,7 +39,7 @@
 .cgs-top { min-height: 34px; gap: 8px; }
 }
 </style>
-<section class="cgs" aria-label="グループサービス">
+<section class="cgs" aria-label="グループサービス" style="--cgs-max: 1120px">
   <div class="cgs-in">
     <h2 class="cgs-h">グループサービス</h2>
     <p class="cgs-lead">コエカツは、株式会社コンテンシャルのグループサービスの1つです。</p>

@@ -34,7 +34,9 @@
       },
       "cta": "無料で試す",
       "embed": true,
-      "asset_base": "/group-services/"
+      "asset_base": "/group-services/",
+      "max_width": 960,
+      "min_card": 300
     },
     {
       "id": "zippa",
@@ -44,7 +46,8 @@
       "desc": "タグを1本貼るだけで、サイトの表示を速くする",
       "cta": "無料で試す",
       "embed": true,
-      "asset_base": "/group-services/"
+      "asset_base": "/group-services/",
+      "max_width": 1072
     },
     {
       "id": "koekatsu",
@@ -54,7 +57,8 @@
       "desc": "無料でアンケートを作って、投票を集められる",
       "cta": "無料で試す",
       "embed": true,
-      "asset_base": "/group-services/"
+      "asset_base": "/group-services/",
+      "max_width": 1120
     },
     {
       "id": "conoha-pencil",

@@ -34,6 +34,7 @@ python3 build.py
 | `desc_on` | 載せる先ごとの紹介文 |
 | `order_on` | 載せる先ごとの並び順 |
 | `max_width` | 帯の幅（px。既定 1152） |
+| `min_card` | カードの最小の幅（px。既定 165）。1 行に並ぶ枚数が変わる |
 | `asset_base` | 画像を置く場所（既定 `/group-services/`） |
 | `max_cards`・`all_services_url` | カードが上限を超えたとき、上位だけを出して一覧ページへ送る |
 
