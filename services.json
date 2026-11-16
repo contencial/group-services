@@ -79,7 +79,10 @@
       "desc": "Google の検索対策を、初心者向けに無料で解説",
       "cta": "記事を読む",
       "embed": true,
-      "asset_base": "/group-services/"
+      "asset_base": "/wp-content/mu-plugins/group-services-band/assets/",
+      "extra_css": ".cgs { margin-top: 50px; }\n.cgs + .site-footer { margin-top: 0; }",
+      "wordpress_mu_plugin": "group-services-band",
+      "before_html": "<div class=\"site-footer\" aria-hidden=\"true\" style=\"display:block!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important\"></div>"
     }
   ],
   "order_on": {}

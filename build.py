@@ -4,6 +4,7 @@
 使い方: python3 build.py
   dist/<id>.html     載せる先ごとの帯
   dist/assets/       ロゴ・写真
+  dist/wordpress/    WordPress の mu-plugins に置くもの（本体・帯・画像）
   dist/preview.html  表示の確認用ページ
 """
 import hashlib
@@ -123,14 +124,30 @@ def main():
         shutil.copy2(f, DIST / 'assets' / f.name)
 
     sites = [s for s in data['services'] if s['embed']]
+    op_photo = data['operator']['photo']
     preview = []
     for site in sites:
         body = band_html(data, site)
-        stamp = hashlib.sha256((css + body).encode('utf-8')).hexdigest()[:12]
+        # 帯の前に置く HTML（載せる先のテーマが、フッターの位置を目印に動く部品を持つ場合の目印など）
+        before = (site['before_html'] + '\n') if site.get('before_html') else ''
+        # 載せる先だけに要る指定（フッターとの間の余白など）を足す
+        site_css = css + (minify_css(site['extra_css']) if site.get('extra_css') else '')
+        stamp = hashlib.sha256((site_css + before + body).encode('utf-8')).hexdigest()[:12]
         out = (f'<!-- group-services {stamp} -->\n'
-               f'<style>\n{css}</style>\n{body}')
+               f'<style>\n{site_css}</style>\n{before}{body}')
         (DIST / f'{site["id"]}.html').write_text(out, encoding='utf-8')
         print(f'{site["id"]}.html  {stamp}  {len(out.encode("utf-8"))} bytes  カード {len(cards_for(data, site["id"]))} 枚')
+        # WordPress のサイトには、mu-plugins に置く形にまとめて出す（直下に本体、同名のフォルダに帯と画像）
+        if site.get('wordpress_mu_plugin'):
+            name = site['wordpress_mu_plugin']
+            mu = DIST / 'wordpress' / 'mu-plugins'
+            (mu / name / 'assets').mkdir(parents=True)
+            shutil.copy2(HERE / 'wordpress' / 'mu-plugins' / f'{name}.php', mu / f'{name}.php')
+            (mu / name / 'band.html').write_text(out, encoding='utf-8')
+            used = {op_photo} | {s['logo'] for s in cards_for(data, site['id']) if s.get('logo')}
+            for f in sorted(used):
+                shutil.copy2(HERE / 'assets' / f, mu / name / 'assets' / f)
+            print(f'wordpress/mu-plugins/{name}.php  画像 {len(used)} 枚')
         # 確認用のページでは、画像を dist/assets/ から読む
         preview.append((f'{site["name"]} に載せる帯', band_html(data, {**site, 'asset_base': 'assets/'})))
 

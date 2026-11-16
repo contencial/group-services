@@ -7,8 +7,8 @@
 .cgs img { display: block; max-width: none; border: 0; }
 /* 幅は載せる先の本文の幅に合わせる（services.json の max_width。既定は 1152px） */
 .cgs-in { max-width: var(--cgs-max, 1152px); margin: 0 auto; }
-/* 見出しは、載せる先のサイトの h2 の指定（字間・中央寄せなど）を引き継がない */
-.cgs h2.cgs-h { font-size: 18px; font-weight: 800; line-height: 1.4; color: #0f172a; letter-spacing: normal; text-align: left; text-transform: none; text-wrap: wrap; font-family: inherit; }
+/* 見出しは、載せる先のサイトの h2 の指定（字間・中央寄せ・飾りの線など）を引き継がない */
+.cgs .cgs-in h2.cgs-h { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; font-size: 18px; font-weight: 800; line-height: 1.4; color: #0f172a; letter-spacing: normal; text-align: left; text-transform: none; text-wrap: wrap; font-family: inherit; }
 .cgs p.cgs-lead { font-size: 13px; color: #475569; margin: 4px 0 14px; }
 
 /* 運営者のパネル。カードと同じ列の 1 枚目に並べ、高さはカードとそろう */
