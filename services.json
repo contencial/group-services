@@ -47,7 +47,8 @@
       "cta": "無料で試す",
       "embed": true,
       "asset_base": "/group-services/",
-      "max_width": 1072
+      "max_width": 1072,
+      "min_card": 300
     },
     {
       "id": "koekatsu",

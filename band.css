@@ -1,13 +1,14 @@
 /* グループサービスの帯。載せる先のサイトのスタイルに左右されないよう、
    クラス名は cgs- で始め、大きさは px で決める（rem は載せる先の基準の大きさで変わるため）。 */
 .cgs, .cgs * { box-sizing: border-box; }
-.cgs { margin: 0; padding: 40px 16px; background: #f8fafc; border-top: 1px solid #e2e8f0; color: #0f172a; font-size: 14px; line-height: 1.6; text-align: left; }
+.cgs { margin: 0; padding: 40px 16px; letter-spacing: normal; background: #f8fafc; border-top: 1px solid #e2e8f0; color: #0f172a; font-size: 14px; line-height: 1.6; text-align: left; }
 .cgs h2, .cgs p, .cgs ul, .cgs li { margin: 0; padding: 0; list-style: none; border: 0; background: none; }
 .cgs a { color: inherit; text-decoration: none; }
 .cgs img { display: block; max-width: none; border: 0; }
 /* 幅は載せる先の本文の幅に合わせる（services.json の max_width。既定は 1152px） */
 .cgs-in { max-width: var(--cgs-max, 1152px); margin: 0 auto; }
-.cgs h2.cgs-h { font-size: 18px; font-weight: 800; line-height: 1.4; color: #0f172a; }
+/* 見出しは、載せる先のサイトの h2 の指定（字間・中央寄せなど）を引き継がない */
+.cgs h2.cgs-h { font-size: 18px; font-weight: 800; line-height: 1.4; color: #0f172a; letter-spacing: normal; text-align: left; text-transform: none; text-wrap: wrap; font-family: inherit; }
 .cgs p.cgs-lead { font-size: 13px; color: #475569; margin: 4px 0 14px; }
 
 /* 運営者のパネル。カードと同じ列の 1 枚目に並べ、高さはカードとそろう */
