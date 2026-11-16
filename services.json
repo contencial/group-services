@@ -85,5 +85,17 @@
       "before_html": "<div class=\"site-footer\" aria-hidden=\"true\" style=\"display:block!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important\"></div>"
     }
   ],
-  "order_on": {}
+  "order_on": {},
+  "sites": [
+    {
+      "id": "contencial",
+      "name": "株式会社コンテンシャル",
+      "lead": "株式会社コンテンシャルが運営しているサービスです。",
+      "operator": false,
+      "asset_base": "/wp-content/mu-plugins/group-services-band/assets/",
+      "wordpress_mu_plugin": "group-services-band",
+      "extra_css": ".cgs { margin-top: 50px; }\n.cgs + .site-footer { margin-top: 0; }",
+      "before_html": "<div class=\"site-footer\" aria-hidden=\"true\" style=\"display:block!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important\"></div>"
+    }
+  ]
 }

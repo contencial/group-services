@@ -43,6 +43,8 @@ def load():
         if s.get('logo'):
             assert (HERE / 'assets' / s['logo']).is_file(), f"assets/{s['logo']} が無い"
     assert (HERE / 'assets' / data['operator']['photo']).is_file(), '運営者の写真が無い'
+    for s in data.get('sites', []):
+        assert s['id'] not in ids, f"services.json: sites の id {s['id']} がサービスと重なっている"
     return data
 
 
@@ -84,7 +86,7 @@ def band_html(data, site, services=None, all_url=None):
     if len(cards) > limit and all_url:  # 上限を超えたら上位だけ出して、一覧ページへ送る
         cards = cards[:limit]
         more = f'    <p class="cgs-all"><a href="{esc(all_url)}" target="_blank" rel="noopener">すべてのサービスを見る</a></p>\n'
-    lead = data['lead'].replace('{site}', site['name'])
+    lead = site.get('lead') or data['lead'].replace('{site}', site['name'])
     # 載せる先の本文の幅と、カードの最小の幅（px）。書いていなければ CSS の既定
     props = []
     if site.get('max_width'):
@@ -92,12 +94,8 @@ def band_html(data, site, services=None, all_url=None):
     if site.get('min_card'):
         props.append(f'--cgs-min: {int(site["min_card"])}px')
     width = f' style="{"; ".join(props)}"' if props else ''
-    return (
-        f'<section class="cgs" aria-label="{esc(data["heading"])}"{width}>\n'
-        '  <div class="cgs-in">\n'
-        f'    <h2 class="cgs-h">{esc(data["heading"])}</h2>\n'
-        f'    <p class="cgs-lead">{esc(lead)}</p>\n'
-        '    <ul class="cgs-list">\n'
+    # 運営者のパネル（会社サイトのように、載せる先が運営者自身のときは出さない）
+    operator = (
         '      <li class="cgs-op">\n'
         f'        <img class="cgs-op-ph" src="{esc(asset(base, op["photo"]))}" alt="{esc(op["person"])}" width="60" height="60" loading="lazy" decoding="async">\n'
         '        <div>\n'
@@ -106,6 +104,14 @@ def band_html(data, site, services=None, all_url=None):
         f'          <div class="cgs-op-n">{esc(op["title"])} {esc(op["person"])}</div>\n'
         '        </div>\n'
         '      </li>\n'
+    )
+    return (
+        f'<section class="cgs" aria-label="{esc(data["heading"])}"{width}>\n'
+        '  <div class="cgs-in">\n'
+        f'    <h2 class="cgs-h">{esc(data["heading"])}</h2>\n'
+        f'    <p class="cgs-lead">{esc(lead)}</p>\n'
+        '    <ul class="cgs-list">\n'
+        + (operator if site.get('operator', True) else '')
         + ''.join(card_html(s, site['id'], base) for s in cards) +
         '    </ul>\n'
         + more +
@@ -123,7 +129,8 @@ def main():
     for f in sorted((HERE / 'assets').iterdir()):
         shutil.copy2(f, DIST / 'assets' / f.name)
 
-    sites = [s for s in data['services'] if s['embed']]
+    # 帯を載せる先: embed が true のサービスと、サービスではない載せ先（sites）
+    sites = [s for s in data['services'] if s['embed']] + data.get('sites', [])
     op_photo = data['operator']['photo']
     preview = []
     for site in sites:
@@ -140,14 +147,16 @@ def main():
         # WordPress のサイトには、mu-plugins に置く形にまとめて出す（直下に本体、同名のフォルダに帯と画像）
         if site.get('wordpress_mu_plugin'):
             name = site['wordpress_mu_plugin']
-            mu = DIST / 'wordpress' / 'mu-plugins'
+            mu = DIST / 'wordpress' / site['id'] / 'mu-plugins'
             (mu / name / 'assets').mkdir(parents=True)
             shutil.copy2(HERE / 'wordpress' / 'mu-plugins' / f'{name}.php', mu / f'{name}.php')
             (mu / name / 'band.html').write_text(out, encoding='utf-8')
-            used = {op_photo} | {s['logo'] for s in cards_for(data, site['id']) if s.get('logo')}
+            used = {s['logo'] for s in cards_for(data, site['id']) if s.get('logo')}
+            if site.get('operator', True):
+                used.add(op_photo)
             for f in sorted(used):
                 shutil.copy2(HERE / 'assets' / f, mu / name / 'assets' / f)
-            print(f'wordpress/mu-plugins/{name}.php  画像 {len(used)} 枚')
+            print(f'wordpress/{site["id"]}/mu-plugins/{name}.php  画像 {len(used)} 枚')
         # 確認用のページでは、画像を dist/assets/ から読む
         preview.append((f'{site["name"]} に載せる帯', band_html(data, {**site, 'asset_base': 'assets/'})))
 
