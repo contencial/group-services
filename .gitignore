@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+CLAUDE.md
+.codex
+.cursor/
+.playwright-mcp/
+dist/preview.html

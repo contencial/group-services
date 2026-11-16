@@ -1,0 +1,81 @@
+{
+  "heading": "グループサービス",
+  "lead": "{site}は、株式会社コンテンシャルのグループサービスの1つです。",
+  "max_cards": 10,
+  "all_services_url": null,
+  "operator": {
+    "label": "運営",
+    "company": "株式会社コンテンシャル",
+    "company_url": "https://seo.contencial.co.jp/",
+    "title": "代表取締役",
+    "person": "柏崎 剛",
+    "photo": "kashiwazaki.jpg"
+  },
+  "services": [
+    {
+      "id": "prenica",
+      "name": "プレニカ",
+      "url": "https://www.prenica.jp/",
+      "logo": "prenica.png",
+      "desc": "審査を通ったプレスリリースだけを載せる、無料の配信サービス",
+      "cta": "無料で試す",
+      "embed": true,
+      "asset_base": "/group-services/",
+      "max_width": 1120
+    },
+    {
+      "id": "yomitasu",
+      "name": "ヨミタス",
+      "url": "https://www.yomitasu.jp/",
+      "logo": "yomitasu.png",
+      "desc": "サイトの内容を、AI アプリから読める形にして配信",
+      "desc_on": {
+        "prenica": "自社サイトの内容を、AI アプリから読める形にして配信"
+      },
+      "cta": "無料で試す",
+      "embed": true,
+      "asset_base": "/group-services/"
+    },
+    {
+      "id": "zippa",
+      "name": "Zippa",
+      "url": "https://www.zippa.jp/",
+      "logo": "zippa.png",
+      "desc": "タグを1本貼るだけで、サイトの表示を速くする",
+      "cta": "無料で試す",
+      "embed": true,
+      "asset_base": "/group-services/"
+    },
+    {
+      "id": "koekatsu",
+      "name": "コエカツ",
+      "url": "https://www.datasetsearch.jp/",
+      "logo": "koekatsu.png",
+      "desc": "無料でアンケートを作って、投票を集められる",
+      "cta": "無料で試す",
+      "embed": true,
+      "asset_base": "/group-services/"
+    },
+    {
+      "id": "conoha-pencil",
+      "name": "ConoHa Pencil",
+      "url": "https://www.conoha.jp/function/conoha-pencil/",
+      "logo": "conoha-pencil.png",
+      "tag": "API提供",
+      "desc": "SEO に強い AI ライティングツール",
+      "cta": "公式サイトへ",
+      "embed": false
+    },
+    {
+      "id": "seolab",
+      "name": "SEO対策研究室",
+      "url": "https://www.tsuyoshikashiwazaki.jp/",
+      "logo": "seolab.jpg",
+      "desc": "Google の検索対策を、初心者向けに無料で解説",
+      "cta": "記事を読む",
+      "embed": true,
+      "asset_base": "/group-services/"
+    }
+  ],
+  "order_on": {}
+}
