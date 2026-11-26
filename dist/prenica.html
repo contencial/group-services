@@ -1,11 +1,11 @@
-<!-- group-services ed313057386a -->
+<!-- group-services 45146b62e45c -->
 <style>
 .cgs, .cgs * { box-sizing: border-box; }
 .cgs { margin: 0; padding: 40px 16px; letter-spacing: normal; background: #f8fafc; border-top: 1px solid #e2e8f0; color: #0f172a; font-size: 14px; line-height: 1.6; text-align: left; }
 .cgs h2, .cgs p, .cgs ul, .cgs li { margin: 0; padding: 0; list-style: none; border: 0; background: none; }
 .cgs a { color: inherit; text-decoration: none; }
 .cgs img { display: block; max-width: none; border: 0; }
-.cgs-in { max-width: var(--cgs-max, 1152px); margin: 0 auto; }
+.cgs-in { max-width: var(--cgs-max, 1152px); margin: 0 auto; container-type: inline-size; }
 .cgs .cgs-in h2.cgs-h { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; font-size: 18px; font-weight: 800; line-height: 1.4; color: #0f172a; letter-spacing: normal; text-align: left; text-transform: none; text-wrap: wrap; font-family: inherit; }
 .cgs p.cgs-lead { font-size: 13px; color: #475569; margin: 4px 0 14px; }
 .cgs li.cgs-op { display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: 13px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; }
@@ -15,7 +15,8 @@
 .cgs .cgs-op-c a { text-decoration: underline; text-underline-offset: 2px; }
 .cgs .cgs-op-c a:hover { color: #1d4ed8; }
 .cgs-op-n { font-size: 12px; color: #334155; line-height: 1.5; margin-top: 1px; }
-.cgs ul.cgs-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--cgs-min, 165px), 1fr)); gap: 12px; }
+.cgs ul.cgs-list { --cgs-cols: 2; --cgs-gap: 12px; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--cgs-gap); }
+.cgs ul.cgs-list > li { flex: 0 0 calc((100% - (var(--cgs-cols) - 1) * var(--cgs-gap)) / var(--cgs-cols)); min-width: 0; }
 .cgs li.cgs-card { position: relative; display: flex; flex-direction: column; gap: 8px; padding: 13px; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; transition: border-color .15s, box-shadow .15s; }
 .cgs li.cgs-card:hover, .cgs li.cgs-card:focus-within { border-color: #93c5fd; box-shadow: 0 4px 14px rgba(15, 23, 42, .08); }
 .cgs-top { display: flex; align-items: center; gap: 9px; min-height: 36px; }
@@ -32,14 +33,18 @@
 .cgs p.cgs-all a { color: #1d4ed8; text-decoration: underline; text-underline-offset: 2px; }
 @media (max-width: 639px) {
 .cgs { padding: 28px 16px; }
-.cgs ul.cgs-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.cgs li.cgs-op { grid-column: 1 / -1; flex-direction: row; align-items: center; justify-content: flex-start; gap: 14px; }
+.cgs .cgs-in ul.cgs-list { --cgs-cols: 2; --cgs-gap: 10px; }
+.cgs .cgs-in ul.cgs-list > li.cgs-op { flex-basis: 100%; flex-direction: row; align-items: center; justify-content: flex-start; gap: 14px; }
 .cgs li.cgs-card { padding: 12px; }
 .cgs-logo { width: 34px; height: 34px; }
 .cgs-top { min-height: 34px; gap: 8px; }
 }
+.cgs[data-cgs-layout="7-165"] ul.cgs-list { --cgs-cols: 2; }
+@container (min-width: 519px) { .cgs[data-cgs-layout="7-165"] ul.cgs-list { --cgs-cols: 3; } }
+@container (min-width: 696px) { .cgs[data-cgs-layout="7-165"] ul.cgs-list { --cgs-cols: 4; } }
+@container (min-width: 1227px) { .cgs[data-cgs-layout="7-165"] ul.cgs-list { --cgs-cols: 7; } }
 </style>
-<section class="cgs" aria-label="グループサービス" style="--cgs-max: 1120px">
+<section class="cgs" aria-label="グループサービス" data-cgs-layout="7-165" style="--cgs-max: 1120px">
   <div class="cgs-in">
     <h2 class="cgs-h">グループサービス</h2>
     <p class="cgs-lead">プレニカは、株式会社コンテンシャルのグループサービスの1つです。</p>

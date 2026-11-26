@@ -65,6 +65,34 @@ def cards_for(data, site_id, services=None):
     return others
 
 
+GAP = 12        # カードの間（px。band.css の --cgs-gap と同じ）
+MIN_CARD = 165  # カードの最小の幅の既定（px）
+
+
+def best_cols(n, max_cols):
+    """n 枚を、1 行 max_cols 枚までで並べるときの 1 行の枚数。行の数を最少にしたうえで、各行の枚数がなるべくそろう数。"""
+    max_cols = max(1, min(n, max_cols))
+    rows = -(-n // max_cols)
+    return -(-n // rows)
+
+
+def layout_css(site, n):
+    """帯の幅ごとの 1 行の枚数（コンテナ クエリ）。帯の幅は .cgs-in の幅。"""
+    m = int(site.get('min_card') or MIN_CARD)
+    key = f'{n}-{m}'
+    sel = f'.cgs[data-cgs-layout="{key}"] ul.cgs-list'
+    rules = [f'{sel} {{ --cgs-cols: {min(2, n)}; }}']
+    prev = min(2, n)
+    for c in range(2, n + 1):
+        cols = best_cols(n, c)
+        if cols == prev:
+            continue
+        width = c * m + (c - 1) * GAP  # c 枚が最小の幅で入る帯の幅
+        rules.append(f'@container (min-width: {width}px) {{ {sel} {{ --cgs-cols: {cols}; }} }}')
+        prev = cols
+    return key, '\n'.join(rules) + '\n'
+
+
 def card_html(s, site_id, base):
     desc = s.get('desc_on', {}).get(site_id, s['desc'])
     if s.get('logo'):
@@ -85,12 +113,9 @@ def band_html(data, site, services=None, all_url=None):
     """site（services.json の 1 件）に載せる帯の HTML（スタイルは含まない）。"""
     op = data['operator']
     base = site.get('asset_base', '/group-services/')
-    cards = cards_for(data, site['id'], services)
-    limit = data.get('max_cards', 10)
-    all_url = all_url if all_url is not None else data.get('all_services_url')
+    cards, all_url, over = shown_cards(data, site, services, all_url)
     more = ''
-    if len(cards) > limit and all_url:  # 上限を超えたら上位だけ出して、一覧ページへ送る
-        cards = cards[:limit]
+    if over:
         more = f'    <p class="cgs-all"><a href="{esc(all_url)}" target="_blank" rel="noopener">すべてのサービスを見る</a></p>\n'
     lead = site.get('lead') or data['lead'].replace('{site}', site['name'])
     # 載せる先の本文の幅と、カードの最小の幅（px）。書いていなければ CSS の既定
@@ -100,6 +125,8 @@ def band_html(data, site, services=None, all_url=None):
     if site.get('min_card'):
         props.append(f'--cgs-min: {int(site["min_card"])}px')
     width = f' style="{"; ".join(props)}"' if props else ''
+    n_items = len(cards) + (1 if site.get('operator', True) else 0)
+    layout_key, _ = layout_css(site, n_items)
     # 運営者のパネル（会社サイトのように、載せる先が運営者自身のときは出さない）
     operator = (
         '      <li class="cgs-op">\n'
@@ -112,7 +139,7 @@ def band_html(data, site, services=None, all_url=None):
         '      </li>\n'
     )
     return (
-        f'<section class="cgs" aria-label="{esc(data["heading"])}"{width}>\n'
+        f'<section class="cgs" aria-label="{esc(data["heading"])}" data-cgs-layout="{layout_key}"{width}>\n'
         '  <div class="cgs-in">\n'
         f'    <h2 class="cgs-h">{esc(data["heading"])}</h2>\n'
         f'    <p class="cgs-lead">{esc(lead)}</p>\n'
@@ -126,13 +153,28 @@ def band_html(data, site, services=None, all_url=None):
     )
 
 
+def shown_cards(data, site, services=None, all_url=None):
+    """帯に出すカード・一覧ページの URL・上限を超えたか。上限を超えたら上位だけ出して、一覧ページへ送る。"""
+    cards = cards_for(data, site['id'], services)
+    limit = data.get('max_cards', 10)
+    all_url = all_url if all_url is not None else data.get('all_services_url')
+    over = bool(len(cards) > limit and all_url)
+    return (cards[:limit] if over else cards), all_url, over
+
+
+def site_layout_css(data, site, services=None, all_url=None):
+    """載せる先に出す帯の、1 行の枚数の指定。"""
+    cards, _, _ = shown_cards(data, site, services, all_url)
+    return layout_css(site, len(cards) + (1 if site.get('operator', True) else 0))[1]
+
+
 def site_html(data, site, css, base=None):
     """載せる先 1 件分の、スタイル込みの帯。base を渡すと画像の置き場をそれにする。"""
     body = band_html(data, site if base is None else {**site, 'asset_base': base})
     # 帯の前に置く HTML（載せる先のテーマが、フッターの位置を目印に動く部品を持つ場合の目印など）
     before = (site['before_html'] + '\n') if site.get('before_html') else ''
     # 載せる先だけに要る指定（フッターとの間の余白など）を足す
-    site_css = css + (minify_css(site['extra_css']) if site.get('extra_css') else '')
+    site_css = css + (minify_css(site['extra_css']) if site.get('extra_css') else '') + site_layout_css(data, site)
     stamp = hashlib.sha256((site_css + before + body).encode('utf-8')).hexdigest()[:12]
     return stamp, (f'<!-- group-services {stamp} -->\n'
                    f'<style>\n{site_css}</style>\n{before}{body}')
@@ -176,7 +218,7 @@ def main():
                 shutil.copy2(HERE / 'assets' / f, mu / name / 'assets' / f)
             print(f'wordpress/{site["id"]}/mu-plugins/{name}.php  画像 {len(used)} 枚')
         # 確認用のページでは、画像を dist/assets/ から読む
-        preview.append((f'{site["name"]} に載せる帯', band_html(data, {**site, 'asset_base': 'assets/'})))
+        preview.append((f'{site["name"]} に載せる帯', band_html(data, {**site, 'asset_base': 'assets/'}), site_layout_css(data, site)))
 
     # サービスが増えた場合の見え方（確認用ページにだけ出す）
     first = {**sites[0], 'asset_base': 'assets/'}
@@ -185,7 +227,7 @@ def main():
                   'desc': '増えた場合の見え方を確かめるための仮のカード', 'cta': '無料で試す', 'embed': False}
                  for i in range(extra)]
         label = f'【確認用】サービスが {extra} 個増えた場合（{sites[0]["name"]}）' + ('・上限を超えた分は一覧へ' if all_url else '')
-        preview.append((label, band_html(data, first, data['services'] + dummy, all_url)))
+        preview.append((label, band_html(data, first, data['services'] + dummy, all_url), site_layout_css(data, first, data['services'] + dummy, all_url)))
 
     page = ['<!doctype html>\n<html lang="ja">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
@@ -193,8 +235,8 @@ def main():
             '<style>body{margin:0;font-family:system-ui,-apple-system,"Hiragino Sans","Noto Sans JP",sans-serif;background:#fff;color:#111}'
             '.pv-l{margin:0;padding:18px 16px 8px;font-size:13px;font-weight:700;color:#b45309}'
             '.pv-f{background:#172554;color:#bfdbfe;padding:22px 16px;font-size:12px}</style>\n'
-            f'<style>\n{css}</style>\n</head>\n<body>\n']
-    for label, body in preview:
+            f'<style>\n{css}{"".join(sorted(set(lc for _, _, lc in preview)))}</style>\n</head>\n<body>\n']
+    for label, body, _ in preview:
         page.append(f'<p class="pv-l">{esc(label)}</p>\n{body}<div class="pv-f">（ここからサイトのフッター）</div>\n')
     page.append('</body>\n</html>\n')
     (DIST / 'preview.html').write_text(''.join(page), encoding='utf-8')

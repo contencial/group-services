@@ -47,7 +47,7 @@
       "embed": true,
       "asset_base": "/group-services/",
       "max_width": 960,
-      "min_card": 300
+      "min_card": 220
     },
     {
       "id": "zippa",
@@ -59,7 +59,7 @@
       "embed": true,
       "asset_base": "/group-services/",
       "max_width": 1072,
-      "min_card": 300
+      "min_card": 220
     },
     {
       "id": "koekatsu",
