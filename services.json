@@ -24,6 +24,17 @@
       "max_width": 1120
     },
     {
+      "id": "prenica-personal",
+      "name": "プレニカ パーソナル",
+      "url": "https://personal.prenica.jp/",
+      "logo": "prenica-personal.png",
+      "desc": "個人で活動する方のための、無料のプレスリリース配信",
+      "cta": "無料で試す",
+      "embed": true,
+      "asset_base": "/group-services/",
+      "max_width": 1120
+    },
+    {
       "id": "yomitasu",
       "name": "ヨミタス",
       "url": "https://www.yomitasu.jp/",
