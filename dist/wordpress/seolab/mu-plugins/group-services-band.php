@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Group Services Band
  * Description: フッターの直前に、グループサービスの紹介の帯を表示します（mu-plugins に置いて使います）。
- * Version: 1.0.0
+ * Version: 1.1.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: 株式会社コンテンシャル
@@ -20,13 +20,56 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 const GSBAND_DIR = __DIR__ . '/group-services-band';
 
+/** GitHub から取ってきた帯の控え（アップロードの置き場の下）。 */
+const GSBAND_CACHE_SUBDIR = 'group-services-band';
+
+/** 帯を取りに行く定期実行のフック名。 */
+const GSBAND_CRON_HOOK = 'gsband_refresh';
+
+require_once GSBAND_DIR . '/group-services-remote.php';
+
 /** band.html の中で、画像の置き場として書かれているパス（実際の URL に置き換える）。 */
 const GSBAND_ASSET_PLACEHOLDER = '/wp-content/mu-plugins/group-services-band/assets/';
+
+/** どの帯を取りに行くか（services.json の id。site.txt に書いてある）。 */
+function gsband_site_id() {
+	$file = GSBAND_DIR . '/site.txt';
+	return is_readable( $file ) ? trim( (string) file_get_contents( $file ) ) : '';
+}
+
+/** 控えのファイルの絶対パス。 */
+function gsband_cache_file() {
+	$uploads = wp_upload_dir( null, false );
+	if ( empty( $uploads['basedir'] ) ) {
+		return '';
+	}
+	return trailingslashit( $uploads['basedir'] ) . GSBAND_CACHE_SUBDIR . '/band.html';
+}
+
+/** GitHub から帯を取ってきて、控えを新しくする（1 時間ごとの定期実行から呼ぶ）。 */
+function gsband_refresh() {
+	$site_id = gsband_site_id();
+	$cache   = gsband_cache_file();
+	if ( '' === $site_id || '' === $cache ) {
+		return;
+	}
+	Contencial_Group_Services_Remote::refresh( $site_id, $cache );
+}
+add_action( GSBAND_CRON_HOOK, 'gsband_refresh' );
+
+/** 定期実行を登録する（まだ無いときだけ）。 */
+function gsband_schedule() {
+	if ( ! wp_next_scheduled( GSBAND_CRON_HOOK ) ) {
+		wp_schedule_event( time() + 60, 'hourly', GSBAND_CRON_HOOK );
+	}
+}
+add_action( 'init', 'gsband_schedule' );
 
 /**
  * 帯の HTML を返す。出さないときは空文字。
  *
- * band.html が無い・読めない・中身が帯でないときは、何も出さない（ページはそのまま出る）。
+ * GitHub から取ってきた控えがあればそれを、無ければ同じ場所の band.html を出す。
+ * どちらも無い・読めない・中身が帯でないときは、何も出さない（ページはそのまま出る）。
  */
 function gsband_html() {
 	static $html = null;
@@ -34,6 +77,15 @@ function gsband_html() {
 		return $html;
 	}
 	$html = '';
+
+	$cache = gsband_cache_file();
+	if ( '' !== $cache ) {
+		$remote = Contencial_Group_Services_Remote::read( $cache );
+		if ( null !== $remote ) {
+			$html = $remote;
+			return $html;
+		}
+	}
 
 	$file = GSBAND_DIR . '/band.html';
 	if ( ! is_readable( $file ) ) {
