@@ -4,6 +4,7 @@
 使い方: python3 build.py
   dist/<id>.html     載せる先ごとの帯
   dist/assets/       ロゴ・写真
+  dist/remote/<id>.html  各サイトが取りに行く帯（画像は jsDelivr から読む。__CGS_REF__ をコミットの番号に置き換えて使う）
   dist/wordpress/    WordPress の mu-plugins に置くもの（本体・帯・画像）
   dist/preview.html  表示の確認用ページ
 """
@@ -17,6 +18,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 DIST = HERE / 'dist'
 esc = html.escape  # 既定で引用符も置き換える（属性の値にそのまま使える）
+
+# 各サイトが取りに行く帯の画像の置き場。__CGS_REF__ は、取りに行く側がコミットの番号に置き換える
+# （jsDelivr はコミットの番号の URL の中身を変えない。ブランチ名の URL は最大 12 時間前の中身を返す）。
+REF_MARK = '__CGS_REF__'
+REMOTE_ASSET_BASE = f'https://cdn.jsdelivr.net/gh/contencial/group-services@{REF_MARK}/dist/assets/'
 
 
 def asset(base, name):
@@ -120,12 +126,25 @@ def band_html(data, site, services=None, all_url=None):
     )
 
 
+def site_html(data, site, css, base=None):
+    """載せる先 1 件分の、スタイル込みの帯。base を渡すと画像の置き場をそれにする。"""
+    body = band_html(data, site if base is None else {**site, 'asset_base': base})
+    # 帯の前に置く HTML（載せる先のテーマが、フッターの位置を目印に動く部品を持つ場合の目印など）
+    before = (site['before_html'] + '\n') if site.get('before_html') else ''
+    # 載せる先だけに要る指定（フッターとの間の余白など）を足す
+    site_css = css + (minify_css(site['extra_css']) if site.get('extra_css') else '')
+    stamp = hashlib.sha256((site_css + before + body).encode('utf-8')).hexdigest()[:12]
+    return stamp, (f'<!-- group-services {stamp} -->\n'
+                   f'<style>\n{site_css}</style>\n{before}{body}')
+
+
 def main():
     data = load()
     css = minify_css((HERE / 'band.css').read_text(encoding='utf-8'))
     if DIST.exists():
         shutil.rmtree(DIST)
     (DIST / 'assets').mkdir(parents=True)
+    (DIST / 'remote').mkdir()
     for f in sorted((HERE / 'assets').iterdir()):
         shutil.copy2(f, DIST / 'assets' / f.name)
 
@@ -134,15 +153,11 @@ def main():
     op_photo = data['operator']['photo']
     preview = []
     for site in sites:
-        body = band_html(data, site)
-        # 帯の前に置く HTML（載せる先のテーマが、フッターの位置を目印に動く部品を持つ場合の目印など）
-        before = (site['before_html'] + '\n') if site.get('before_html') else ''
-        # 載せる先だけに要る指定（フッターとの間の余白など）を足す
-        site_css = css + (minify_css(site['extra_css']) if site.get('extra_css') else '')
-        stamp = hashlib.sha256((site_css + before + body).encode('utf-8')).hexdigest()[:12]
-        out = (f'<!-- group-services {stamp} -->\n'
-               f'<style>\n{site_css}</style>\n{before}{body}')
+        stamp, out = site_html(data, site, css)
         (DIST / f'{site["id"]}.html').write_text(out, encoding='utf-8')
+        # 各サイトが取りに行く帯（画像は jsDelivr から読む）
+        _, remote = site_html(data, site, css, REMOTE_ASSET_BASE)
+        (DIST / 'remote' / f'{site["id"]}.html').write_text(remote, encoding='utf-8')
         print(f'{site["id"]}.html  {stamp}  {len(out.encode("utf-8"))} bytes  カード {len(cards_for(data, site["id"]))} 枚')
         # WordPress のサイトには、mu-plugins に置く形にまとめて出す（直下に本体、同名のフォルダに帯と画像）
         if site.get('wordpress_mu_plugin'):
@@ -151,6 +166,9 @@ def main():
             (mu / name / 'assets').mkdir(parents=True)
             shutil.copy2(HERE / 'wordpress' / 'mu-plugins' / f'{name}.php', mu / f'{name}.php')
             (mu / name / 'band.html').write_text(out, encoding='utf-8')
+            # 取りに行く部品と、どの帯を取りに行くか（載せる先の id）
+            shutil.copy2(HERE / 'php' / 'group-services-remote.php', mu / name / 'group-services-remote.php')
+            (mu / name / 'site.txt').write_text(site['id'] + '\n', encoding='utf-8')
             used = {s['logo'] for s in cards_for(data, site['id']) if s.get('logo')}
             if site.get('operator', True):
                 used.add(op_photo)
